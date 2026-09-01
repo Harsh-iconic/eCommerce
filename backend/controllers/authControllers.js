@@ -1,6 +1,7 @@
 const User = require("../models/User")
 const bcrypt = require("bcrypt")
 const validator = require("validator")
+const genrateToken = require("../utils/genrateToken")
 
 // register
 const register = async (req, res) => {
@@ -45,5 +46,43 @@ const register = async (req, res) => {
     }
 }
 
+// login
+const loginUser = async (req, res) => {
+    const {email, password} = req.body;
+    try {
+        const user = await User.findOne({email});
+        if(!user){
+            return res.json({success:false, message:"User doesn't exist"})
+        }
 
-module.exports = {register}
+        const isMatch = await bcrypt.compare(password, user.password);
+        if(!isMatch){
+            return res.json({success:false, message:"Wrong password"})
+        }
+
+        const token = generateToken(user._id, user.role);
+
+        res.status(200).json({
+        message: "Login successful",
+        token,
+        user: {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+        },
+        });
+        } catch (error) {
+        console.log(error)
+        res.json({success:false, message:"Error"})
+        }
+    }
+
+    // const createToken = (id) => {
+    // return jwt.sign({id},process.env.JWT_SECRET);
+    // }
+
+
+
+
+module.exports = {register, loginUser}
