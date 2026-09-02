@@ -3,6 +3,7 @@ const express = require('express');
 const dotenv = require('dotenv')
 const connectDB = require("./config/db.js");
 const authRoutes = require("./routes/authRoutes.js")
+const productRoutes = require("./routes/productRoutes.js")
 
 dotenv.config();
 
@@ -11,6 +12,7 @@ app.use(express.json())
 connectDB()
 
 app.use("/api/auth", authRoutes)
+app.use("/api/products", productRoutes)
 
 app.get("/", (req, res) => {
     res.send("world")

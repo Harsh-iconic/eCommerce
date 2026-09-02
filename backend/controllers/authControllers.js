@@ -5,7 +5,7 @@ const genrateToken = require("../utils/genrateToken")
 
 // register
 const register = async (req, res) => {
-    const {name, email, password} = req.body;
+    const { name, email, password, role } = req.body;
     try {
         // checking user
         const exists = await User.findOne({email});
@@ -28,7 +28,8 @@ const register = async (req, res) => {
         const newUser = await User.create({
             name: name,
             email: email,
-            password: hashedPassword
+            password: hashedPassword,
+            role: role
         })
 
         res.status(201).json({
@@ -60,7 +61,7 @@ const loginUser = async (req, res) => {
             return res.json({success:false, message:"Wrong password"})
         }
 
-        const token = generateToken(user._id, user.role);
+        const token = genrateToken(user._id, user.role);
 
         res.status(200).json({
         message: "Login successful",
