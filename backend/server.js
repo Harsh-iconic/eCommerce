@@ -4,6 +4,7 @@ const dotenv = require('dotenv')
 const connectDB = require("./config/db.js");
 const authRoutes = require("./routes/authRoutes.js")
 const productRoutes = require("./routes/productRoutes.js")
+const cartRoutes = require("./routes/cartRoutes.js")
 
 dotenv.config();
 
@@ -13,6 +14,7 @@ connectDB()
 
 app.use("/api/auth", authRoutes)
 app.use("/api/products", productRoutes)
+app.use("/api/cart", cartRoutes)
 
 app.get("/", (req, res) => {
     res.send("world")
