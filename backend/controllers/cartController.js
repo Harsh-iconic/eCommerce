@@ -89,24 +89,33 @@ const getCart = async (req, res) => {
                 success: true,
                 message: "Cart is empty",
                 cart: {
-                    items: []
+                    items: [],
+                    total: 0
                 }
             });
         }
 
+        let total = 0
+
+        cart.items.forEach((item) => {
+            total += item.price * item.quantity
+        })
+
         res.json({
             success: true,
-            cart
+            cart,
+            total
         });
 
     } catch (error) {
         console.log("GET CART ERROR:", error);
 
-        res.status(500).json({
-        success: false,
-        message: error.message
-    });
-}
+        res.json({
+            success: false,
+            message: error.message
+        })
+    
+    }
 };
 
 
@@ -159,5 +168,77 @@ const removeFromCart = async (req, res) => {
     }
 }
 
+// update
 
-module.exports = {addToCart, getCart, removeFromCart}
+const updateCartQuantity = async (req, res) => {
+    const { productId } = req.params;
+    const { quantity } = req.body;
+
+    try {
+        if(!quantity || quantity < 1){
+            return res.json({
+                success: false,
+                message: "Quantity must be at least 1"
+            });
+        }
+
+        const cart = await Cart.findOne({
+            user: req.user.userId
+        })
+
+        if(!cart) {
+            return res.json({
+                success: false,
+                message: "Cart not found"
+            });
+        }
+
+        const item = cart.items.find(
+            (item) => item.product.toString() === productId
+        )
+
+        if(!item){
+            return res.json({
+                success: false,
+                message: "Product not found in cart"
+            });
+        }
+
+        //get latest product stock
+        const product = await Product.findById(productId)
+
+        if(!product){
+            return res.json({
+                success: false,
+                message: "Product not found"
+            })
+        }
+
+        if(quantity > product.stock){
+            return res.json({
+                success: false,
+                message: `Only ${product.stock} items avilable`
+            })
+        }
+
+        item.quantity = quantity
+
+        await cart.save()
+
+        res.json({
+            success: true,
+            message: "Cart quantity updated",
+            cart
+        })
+    } catch (error) {
+        console.log(error);
+
+        res.json({
+            success: false,
+            message: error.message
+        })
+    }
+}
+
+
+module.exports = {addToCart, getCart, removeFromCart, updateCartQuantity}
