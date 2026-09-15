@@ -105,7 +105,39 @@ const getMyOrders = async (req, res) => {
     }
 };
 
+const getSingleOrder = async (req, res) => {
+    const { orderId } = req.params;
+
+    try {
+        const order = await Order.findOne({
+            _id: orderId,
+            user: req.user.userId
+        }).populate("items.product");
+
+        if (!order) {
+            return res.status(404).json({
+                success: false,
+                message: "Order not found"
+            });
+        }
+
+        res.json({
+            success: true,
+            order
+        });
+
+    } catch (error) {
+        console.log("GET SINGLE ORDER ERROR:", error);
+
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
 module.exports = {
     placeOrder,
-    getMyOrders
+    getMyOrders,
+    getSingleOrder
 };
