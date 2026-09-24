@@ -21,6 +21,42 @@ const ProductDetails = () => {
         }
     };
 
+    const addToCart = async () => {
+        try {
+            const token = localStorage.getItem("token");
+
+            if (!token) {
+                alert("Please login first");
+                return;
+            }
+
+            const response = await api.post(
+                "/cart",
+                {
+                    productId: product._id,
+                    quantity: 1
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+
+            if (response.data.success) {
+                alert("Product added to cart");
+            }
+
+        } catch (error) {
+            console.log("ADD TO CART ERROR:", error);
+
+            alert(
+                error.response?.data?.message ||
+                "Something went wrong"
+            );
+        }
+    };
+
     useEffect(() => {
         getProduct();
     }, [id]);
@@ -62,7 +98,10 @@ const ProductDetails = () => {
                         Stock: {product.stock}
                     </p>
 
-                    <button className="mt-6 bg-black text-white px-6 py-3 rounded-md">
+                    <button
+                        onClick={addToCart}
+                        className="mt-6 bg-black text-white px-6 py-3 rounded-md"
+                    >
                         Add to Cart
                     </button>
 
