@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import api from "../services/Api";
 import Reviews from "../components/Reviews";
+import WishlistButton from "../components/WishlistButton";
 
 const ProductDetails = () => {
   const { id } = useParams();
@@ -64,6 +65,7 @@ const ProductDetails = () => {
             </select>
           </label>
           <button disabled={busy} onClick={addToCart} className="button button-dark">{busy ? "Adding..." : "Add to bag ↗"}</button>
+          <WishlistButton productId={product._id} />
         </div>}
         {notice && <p className="notice" role="status">{notice}</p>}
         <div className="detail-assurances"><span>Thoughtful quality</span><span>Secure checkout</span><span>Helpful support</span></div>
