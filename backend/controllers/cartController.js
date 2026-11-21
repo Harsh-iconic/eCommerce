@@ -59,6 +59,18 @@ const getCart = async (req, res) => {
       return res.json({ success: true, cart: { items: [] }, total: 0 });
     }
 
+    // Keep displayed cart prices in sync with the current catalogue and drop deleted products.
+    const originalLength = cart.items.length;
+    cart.items = cart.items.filter((item) => Boolean(item.product));
+    let cartChanged = cart.items.length !== originalLength;
+    for (const item of cart.items) {
+      if (item.price !== item.product.price) {
+        item.price = item.product.price;
+        cartChanged = true;
+      }
+    }
+    if (cartChanged) await cart.save();
+
     const total = cart.items.reduce(
       (sum, item) => sum + calculateLineTotal(item.price, item.quantity),
       0
