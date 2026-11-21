@@ -6,6 +6,7 @@ const {
   validateShippingAddress,
   calculateLineTotal,
 } = require("../utils/validation");
+const { canTransitionOrder } = require("../utils/orderStatus");
 
 const placeOrder = async (req, res) => {
   const { shippingAddress } = req.body;
@@ -163,20 +164,12 @@ const updateOrderStatus = async (req, res) => {
     return res.status(400).json({ success: false, message: "Invalid order ID" });
   }
 
-  const transitions = {
-    pending: ["processing", "cancelled"],
-    processing: ["shipped", "cancelled"],
-    shipped: ["delivered"],
-    delivered: [],
-    cancelled: [],
-  };
-
   try {
     const order = await Order.findById(orderId);
     if (!order) {
       return res.status(404).json({ success: false, message: "Order not found" });
     }
-    if (!transitions[order.orderStatus]?.includes(orderStatus)) {
+    if (!canTransitionOrder(order.orderStatus, orderStatus)) {
       return res.status(400).json({
         success: false,
         message: `Cannot change order status from ${order.orderStatus} to ${orderStatus}`,
