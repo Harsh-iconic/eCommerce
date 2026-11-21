@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import api from "../services/Api";
+import Reviews from "../components/Reviews";
 
 const ProductDetails = () => {
   const { id } = useParams();
@@ -68,6 +69,7 @@ const ProductDetails = () => {
         <div className="detail-assurances"><span>Thoughtful quality</span><span>Secure checkout</span><span>Helpful support</span></div>
         <Link to="/" className="back-link">← Continue exploring</Link>
       </section>
+      <div className="product-reviews-wrap"><Reviews productId={product._id} /></div>
     </main>
   );
 };
