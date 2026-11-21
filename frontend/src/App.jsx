@@ -6,6 +6,7 @@ import ProductDetails from "./pages/ProductDetails";
 import Cart from "./pages/Cart";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import Wishlist from "./pages/Wishlist";
 import api from "./services/Api";
 
 const Checkout = () => {
@@ -46,6 +47,6 @@ const Admin = () => {
 };
 
 function App() {
-  return <BrowserRouter><Navbar/><Routes><Route path="/" element={<Home/>}/><Route path="/product/:id" element={<ProductDetails/>}/><Route path="/cart" element={<Cart/>}/><Route path="/checkout" element={<Checkout/>}/><Route path="/orders" element={<Orders/>}/><Route path="/admin" element={<Admin/>}/><Route path="/login" element={<Login/>}/><Route path="/register" element={<Register/>}/><Route path="*" element={<main className="empty-state"><h2>Page not found.</h2><Link to="/" className="button button-dark">Back to shop</Link></main>}/></Routes></BrowserRouter>;
+  return <BrowserRouter><Navbar/><Routes><Route path="/" element={<Home/>}/><Route path="/product/:id" element={<ProductDetails/>}/><Route path="/cart" element={<Cart/>}/><Route path="/wishlist" element={<Wishlist/>}/><Route path="/checkout" element={<Checkout/>}/><Route path="/orders" element={<Orders/>}/><Route path="/admin" element={<Admin/>}/><Route path="/login" element={<Login/>}/><Route path="/register" element={<Register/>}/><Route path="*" element={<main className="empty-state"><h2>Page not found.</h2><Link to="/" className="button button-dark">Back to shop</Link></main>}/></Routes></BrowserRouter>;
 }
 export default App;
