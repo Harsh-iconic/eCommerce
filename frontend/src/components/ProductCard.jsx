@@ -1,37 +1,16 @@
 import { Link } from "react-router-dom";
 
-const ProductCard = ({ product }) => {
-    return (
-        <div className="border rounded-lg p-4">
-
-            <Link to={`/product/${product._id}`}>
-
-                <img
-                    src={product.image}
-                    alt={product.name}
-                    className="w-full h-48 object-cover rounded-md"
-                />
-
-                <h2 className="text-lg font-semibold mt-3">
-                    {product.name}
-                </h2>
-
-                <p className="text-gray-600">
-                    ₹{product.price}
-                </p>
-
-                <p className="text-sm text-gray-500">
-                    Stock: {product.stock}
-                </p>
-
-            </Link>
-
-            <button className="mt-3 w-full bg-black text-white py-2 rounded-md">
-                Add to Cart
-            </button>
-
-        </div>
-    );
-};
-
+const ProductCard = ({ product, onAdd }) => (
+  <article className="product-card">
+    <Link to={`/product/${product._id}`} className="product-image-wrap">
+      <img src={product.image || "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800"} alt={product.name} loading="lazy" />
+      <span className="image-tag">{product.stock > 0 ? "IN STOCK" : "SOLD OUT"}</span>
+    </Link>
+    <div className="product-info">
+      <div className="product-meta"><span>{product.category}</span><span>{product.stock > 0 ? "Ready to ship" : "Out of stock"}</span></div>
+      <Link to={`/product/${product._id}`} className="product-name">{product.name}</Link>
+      <div className="product-bottom"><strong>₹{Number(product.price).toLocaleString("en-IN")}</strong><button className="add-button" disabled={!product.stock} onClick={() => onAdd(product)}>+ Add</button></div>
+    </div>
+  </article>
+);
 export default ProductCard;
