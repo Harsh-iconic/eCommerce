@@ -1,4 +1,6 @@
 const Product = require("../models/Product");
+const Cart = require("../models/Cart");
+const User = require("../models/User");
 const { isValidObjectId } = require("../utils/validation");
 
 const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -160,7 +162,11 @@ const deleteProduct = async (req, res) => {
   try {
     const product = await Product.findByIdAndDelete(req.params.id);
     if (!product) return res.status(404).json({ success: false, message: "Product not found." });
-    return res.json({ success: true, message: "Product deleted." });
+    await Promise.all([
+      Cart.updateMany({}, { $pull: { items: { product: product._id } } }),
+      User.updateMany({}, { $pull: { wishlist: product._id } }),
+    ]);
+    return res.json({ success: true, message: "Product deleted and removed from active carts and wishlists." });
   } catch (error) {
     console.error("DELETE_PRODUCT_ERROR", error);
     return res.status(500).json({ success: false, message: "Unable to delete product." });
