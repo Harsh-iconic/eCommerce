@@ -19,6 +19,7 @@ const Navbar = () => {
           <NavLink to="/" end className={linkClass}>Discover</NavLink>
           <NavLink to="/orders" className={linkClass}>My orders</NavLink>
           <NavLink to="/cart" className={linkClass}>Bag</NavLink>
+          <NavLink to="/wishlist" className={linkClass}>Saved</NavLink>
         </div>
         <div className="nav-actions">
           {user ? <><span className="welcome">Hi, {user.name?.split(" ")[0]}</span>{user.role === "admin" && <NavLink to="/admin" className={linkClass}>Admin</NavLink>}<button className="text-button" onClick={logout}>Sign out</button></> : <><Link className="text-button" to="/login">Sign in</Link><Link className="button button-dark button-small" to="/register">Join us</Link></>}
