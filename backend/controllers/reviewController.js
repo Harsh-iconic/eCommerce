@@ -1,6 +1,6 @@
 const Review = require("../models/Review");
 const Product = require("../models/Product");
-const { isValidObjectId } = require("../utils/validation");
+const { isValidObjectId, validateReviewInput } = require("../utils/validation");
 
 const getProductReviews = async (req, res) => {
   const { productId } = req.params;
@@ -42,11 +42,9 @@ const upsertProductReview = async (req, res) => {
   if (!isValidObjectId(productId)) {
     return res.status(400).json({ success: false, message: "Invalid product ID" });
   }
-  if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
-    return res.status(400).json({ success: false, message: "Choose a rating from 1 to 5" });
-  }
-  if (comment.length < 3 || comment.length > 800) {
-    return res.status(400).json({ success: false, message: "Review must be between 3 and 800 characters" });
+  const validation = validateReviewInput(rating, comment);
+  if (!validation.valid) {
+    return res.status(400).json({ success: false, message: validation.message });
   }
 
   try {
