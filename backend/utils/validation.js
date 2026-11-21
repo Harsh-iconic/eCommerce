@@ -28,6 +28,18 @@ const validateShippingAddress = (address = {}) => {
   return { valid: true };
 };
 
+const validateReviewInput = (rating, comment) => {
+  const numericRating = Number(rating);
+  const normalizedComment = String(comment ?? "").trim();
+  if (!Number.isInteger(numericRating) || numericRating < 1 || numericRating > 5) {
+    return { valid: false, message: "Choose a rating from 1 to 5" };
+  }
+  if (normalizedComment.length < 3 || normalizedComment.length > 800) {
+    return { valid: false, message: "Review must be between 3 and 800 characters" };
+  }
+  return { valid: true };
+};
+
 const calculateLineTotal = (price, quantity) =>
   Number((Number(price) * Number(quantity)).toFixed(2));
 
@@ -38,4 +50,5 @@ module.exports = {
   isValidIndianPincode,
   validateShippingAddress,
   calculateLineTotal,
+  validateReviewInput,
 };
