@@ -1,116 +1,75 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import api from "../services/Api.js";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import api from "../services/Api";
 
 const ProductDetails = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const [quantity, setQuantity] = useState(1);
+  const [busy, setBusy] = useState(false);
 
-    const { id } = useParams();
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setError("");
+    api.get(`/products/${id}`)
+      .then(({ data }) => {
+        if (active && data.success) setProduct(data.product);
+        else if (active) setError("This product could not be found.");
+      })
+      .catch((err) => {
+        if (active) setError(err.response?.data?.message || "Unable to load this product.");
+      })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [id]);
 
-    const [product, setProduct] = useState(null);
-
-    const getProduct = async () => {
-        try {
-            const response = await api.get(`/products/${id}`);
-
-            if (response.data.success) {
-                setProduct(response.data.product);
-            }
-
-        } catch (error) {
-            console.log("ERROR:", error);
-        }
-    };
-
-    const addToCart = async () => {
-        try {
-            const token = localStorage.getItem("token");
-
-            if (!token) {
-                alert("Please login first");
-                return;
-            }
-
-            const response = await api.post(
-                "/cart",
-                {
-                    productId: product._id,
-                    quantity: 1
-                },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                }
-            );
-
-            if (response.data.success) {
-                alert("Product added to cart");
-            }
-
-        } catch (error) {
-            console.log("ADD TO CART ERROR:", error);
-
-            alert(
-                error.response?.data?.message ||
-                "Something went wrong"
-            );
-        }
-    };
-
-    useEffect(() => {
-        getProduct();
-    }, [id]);
-
-    if (!product) {
-        return <p className="text-center mt-10">Loading...</p>;
+  const addToCart = async () => {
+    if (!localStorage.getItem("token")) return navigate("/login");
+    setBusy(true);
+    setNotice("");
+    try {
+      await api.post("/cart", { productId: product._id, quantity });
+      setNotice("Added to your bag. Good choice.");
+    } catch (err) {
+      setNotice(err.response?.data?.message || "Could not add this item to your bag.");
+    } finally {
+      setBusy(false);
     }
+  };
 
-    return (
-        <div className="max-w-6xl mx-auto px-6 py-10">
+  if (loading) return <main className="container content-page"><p>Finding the good stuff...</p></main>;
+  if (error || !product) return <main className="container empty-state"><h2>We couldn't find that item.</h2><p>{error}</p><Link to="/" className="button button-dark">Back to the shop</Link></main>;
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-
-                <img
-                    src={product.image}
-                    alt={product.name}
-                    className="w-full h-96 object-cover rounded-lg"
-                />
-
-                <div>
-
-                    <h1 className="text-3xl font-bold">
-                        {product.name}
-                    </h1>
-
-                    <p className="text-2xl font-semibold mt-4">
-                        ₹{product.price}
-                    </p>
-
-                    <p className="text-gray-600 mt-4">
-                        {product.description}
-                    </p>
-
-                    <p className="mt-4">
-                        Category: {product.category}
-                    </p>
-
-                    <p className="mt-2">
-                        Stock: {product.stock}
-                    </p>
-
-                    <button
-                        onClick={addToCart}
-                        className="mt-6 bg-black text-white px-6 py-3 rounded-md"
-                    >
-                        Add to Cart
-                    </button>
-
-                </div>
-
-            </div>
-
-        </div>
-    );
+  return (
+    <main className="container detail-page">
+      <div className="detail-image">
+        <img src={product.image || "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=1000"} alt={product.name} />
+      </div>
+      <section className="detail-copy">
+        <span className="eyebrow">{product.category}</span>
+        <h1>{product.name}<span className="period">.</span></h1>
+        <p className="price">₹{Number(product.price).toLocaleString("en-IN")}</p>
+        <p>{product.description}</p>
+        <p className="stock-note">{product.stock > 0 ? `${product.stock} available · Ready to ship` : "Currently out of stock"}</p>
+        {product.stock > 0 && <div className="detail-actions">
+          <label className="quantity-picker">Quantity
+            <select value={quantity} onChange={(event) => setQuantity(Number(event.target.value))}>
+              {Array.from({ length: Math.min(product.stock, 10) }, (_, index) => index + 1).map((value) => <option key={value} value={value}>{value}</option>)}
+            </select>
+          </label>
+          <button disabled={busy} onClick={addToCart} className="button button-dark">{busy ? "Adding..." : "Add to bag ↗"}</button>
+        </div>}
+        {notice && <p className="notice" role="status">{notice}</p>}
+        <div className="detail-assurances"><span>Thoughtful quality</span><span>Secure checkout</span><span>Helpful support</span></div>
+        <Link to="/" className="back-link">← Continue exploring</Link>
+      </section>
+    </main>
+  );
 };
 
 export default ProductDetails;
